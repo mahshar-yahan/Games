@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rock Paper Scissors Game</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .game-container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 30px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+        
+        .choice-btn {
+            font-size: 4rem;
+            padding: 20px;
+            margin: 10px;
+            border: 3px solid #667eea;
+            border-radius: 15px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .choice-btn:hover:not(:disabled) {
+            transform: scale(1.1);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .choice-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .score-box {
+            font-size: 1.5rem;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 10px;
+            font-weight: bold;
+        }
+        
+        .result-display {
+            font-size: 1.3rem;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+            min-height: 100px;
+        }
+        
+        .choice-display {
+            font-size: 3rem;
+            margin: 20px 0;
+        }
+        
+        .final-result {
+            font-size: 2rem;
+            font-weight: bold;
+            padding: 30px;
+            border-radius: 15px;
+            margin-top: 20px;
+        }
+        
+        .reset-btn {
+            font-size: 1.2rem;
+            padding: 12px 40px;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="game-container">
+            <h1 class="text-center mb-4 text-primary">🎮 Rock Paper Scissors Game</h1>
+            
+            <!-- Round Counter -->
+            <div class="text-center mb-4">
+                <h3 class="text-secondary">Round: <span id="roundCounter">1</span> / 5</h3>
+            </div>
+            
+            <!-- Score Display -->
+            <div class="row text-center mb-4">
+                <div class="col-4">
+                    <div class="score-box bg-success text-white">
+                        You: <span id="playerScore">0</span>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="score-box bg-warning text-white">
+                        Ties: <span id="tieScore">0</span>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="score-box bg-danger text-white">
+                        Computer: <span id="computerScore">0</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Choice Buttons -->
+            <div class="text-center mb-4" id="choiceButtons">
+                <h4 class="mb-3">Choose your move:</h4>
+                <button class="choice-btn" onclick="playRound(0)" id="rockBtn">👊</button>
+                <button class="choice-btn" onclick="playRound(1)" id="paperBtn">🖐</button>
+                <button class="choice-btn" onclick="playRound(2)" id="scissorsBtn">✌️</button>
+                <div class="mt-2">
+                    <small class="text-muted">Rock (👊) | Paper (🖐) | Scissors (✌️)</small>
+                </div>
+            </div>
+            
+            <!-- Choices Display -->
+            <div class="row text-center choice-display" id="choicesDisplay" style="display: none;">
+                <div class="col-6">
+                    <h5>You chose:</h5>
+                    <div id="playerChoice"></div>
+                </div>
+                <div class="col-6">
+                    <h5>Computer chose:</h5>
+                    <div id="computerChoice"></div>
+                </div>
+            </div>
+            
+            <!-- Result Display -->
+            <div class="result-display bg-light text-center" id="resultDisplay">
+                Make your choice to start!
+            </div>
+            
+            <!-- Final Result (Hidden initially) -->
+            <div id="finalResult" style="display: none;">
+                <div class="final-result text-center" id="finalResultBox"></div>
+                <div class="text-center">
+                    <button class="btn btn-primary reset-btn" onclick="resetGame()">Play Again</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Game state variables
+        let playerScore = 0;
+        let computerScore = 0;
+        let ties = 0;
+        let currentRound = 1;
+        const TOTAL_ROUNDS = 5;
+        
+        const choices = ['👊', '🖐', '✌️'];
+        const choiceNames = ['Rock', 'Paper', 'Scissors'];
+        
+        function playRound(playerChoice) {
+            if (currentRound > TOTAL_ROUNDS) return;
+            
+            // Generate computer choice
+            const computerChoice = Math.floor(Math.random() * 3);
+            
+            // Display choices
+            document.getElementById('choicesDisplay').style.display = 'flex';
+            document.getElementById('playerChoice').textContent = choices[playerChoice];
+            document.getElementById('computerChoice').textContent = choices[computerChoice];
+            
+            // Determine winner
+            let resultText = '';
+            let resultClass = '';
+            
+            if (playerChoice === computerChoice) {
+                resultText = `It's a tie! You both chose ${choiceNames[playerChoice]}`;
+                resultClass = 'bg-warning text-white';
+                ties++;
+                document.getElementById('tieScore').textContent = ties;
+            } else if (
+                (playerChoice === 0 && computerChoice === 2) ||  // Rock beats Scissors
+                (playerChoice === 1 && computerChoice === 0) ||  // Paper beats Rock
+                (playerChoice === 2 && computerChoice === 1)     // Scissors beat Paper
+            ) {
+                resultText = `You win! ${choiceNames[playerChoice]} beats ${choiceNames[computerChoice]}`;
+                resultClass = 'bg-success text-white';
+                playerScore++;
+                document.getElementById('playerScore').textContent = playerScore;
+            } else {
+                resultText = `Computer wins! ${choiceNames[computerChoice]} beats ${choiceNames[playerChoice]}`;
+                resultClass = 'bg-danger text-white';
+                computerScore++;
+                document.getElementById('computerScore').textContent = computerScore;
+            }
+            
+            // Display result
+            const resultDisplay = document.getElementById('resultDisplay');
+            resultDisplay.textContent = resultText;
+            resultDisplay.className = 'result-display text-center ' + resultClass;
+            
+            // Check if game is over
+            if (currentRound >= TOTAL_ROUNDS) {
+                setTimeout(showFinalResult, 1500);
+                disableButtons();
+            } else {
+                currentRound++;
+                document.getElementById('roundCounter').textContent = currentRound;
+            }
+        }
+        
+        function showFinalResult() {
+            document.getElementById('choiceButtons').style.display = 'none';
+            document.getElementById('finalResult').style.display = 'block';
+            
+            const finalResultBox = document.getElementById('finalResultBox');
+            let finalText = '';
+            let finalClass = '';
+            
+            if (playerScore > computerScore) {
+                finalText = `🎉 YOU WIN THE GAME!<br>Final Score: ${playerScore} - ${computerScore}`;
+                finalClass = 'bg-success text-white';
+            } else if (computerScore > playerScore) {
+                finalText = `💻 COMPUTER WINS THE GAME!<br>Final Score: ${playerScore} - ${computerScore}`;
+                finalClass = 'bg-danger text-white';
+            } else {
+                finalText = `🤝 THE GAME IS A TIE!<br>Final Score: ${playerScore} - ${computerScore}`;
+                finalClass = 'bg-warning text-white';
+            }
+            
+            finalResultBox.innerHTML = finalText;
+            finalResultBox.className = 'final-result text-center ' + finalClass;
+        }
+        
+        function disableButtons() {
+            document.getElementById('rockBtn').disabled = true;
+            document.getElementById('paperBtn').disabled = true;
+            document.getElementById('scissorsBtn').disabled = true;
+        }
+        
+        function resetGame() {
+            playerScore = 0;
+            computerScore = 0;
+            ties = 0;
+            currentRound = 1;
+            
+            document.getElementById('playerScore').textContent = '0';
+            document.getElementById('computerScore').textContent = '0';
+            document.getElementById('tieScore').textContent = '0';
+            document.getElementById('roundCounter').textContent = '1';
+            
+            document.getElementById('choiceButtons').style.display = 'block';
+            document.getElementById('choicesDisplay').style.display = 'none';
+            document.getElementById('finalResult').style.display = 'none';
+            document.getElementById('resultDisplay').textContent = 'Make your choice to start!';
+            document.getElementById('resultDisplay').className = 'result-display bg-light text-center';
+            
+            document.getElementById('rockBtn').disabled = false;
+            document.getElementById('paperBtn').disabled = false;
+            document.getElementById('scissorsBtn').disabled = false;
+        }
+    </script>
+</body>
+</html>
